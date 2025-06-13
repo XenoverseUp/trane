@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import React from 'react';
 import {render, Box} from 'ink';
+
 import App from './app.js';
 
 process.stdout.write('\x1b[?1049h');

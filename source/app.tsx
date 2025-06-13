@@ -1,14 +1,16 @@
 import React, {useState} from 'react';
-import {Box, Text, useApp, useInput} from 'ink';
+import {Box, useApp, useInput} from 'ink';
 
 import Tabbar from './components/tab-bar.js';
 import {Proc} from './lib/types.js';
 import useProcesses from './hooks/useProcess.js';
+import TabContent from './components/tab-content.js';
+import Instructions from './components/instructions.js';
 
 const commands = [
 	{label: 'Server', command: 'ls', args: ['-la'], cwd: '.'},
 	{label: 'Dashboard', command: 'sleep', args: ['15'], cwd: '.'},
-	{label: 'Landing', command: 'lss', args: ['-ld'], cwd: '.'},
+	{label: 'Landing', command: 'brew', args: ['install'], cwd: '.'},
 ];
 
 export default function App() {
@@ -20,9 +22,15 @@ export default function App() {
 
 	useInput((input, key) => {
 		if (input === 'q') exit();
-		if (key.leftArrow) setTabIndex(i => (i - 1 + procs.length) % procs.length);
-		if (key.rightArrow) setTabIndex(i => (i + 1) % procs.length);
+
+		if (key.leftArrow || input === 'h')
+			setTabIndex(i => (i - 1 + procs.length) % procs.length);
+		if (key.rightArrow || input === 'l')
+			setTabIndex(i => (i + 1) % procs.length);
+
 		if (input === 'a') setAutoScroll(prev => !prev);
+		if (key.upArrow || input === 'k') setAutoScroll(false);
+
 		if (!isNaN(Number(input))) {
 			const idx = parseInt(input, 10) - 1;
 			if (idx >= 0 && idx < procs.length) setTabIndex(idx);
@@ -39,21 +47,14 @@ export default function App() {
 
 			{/* Output */}
 
-			<Box flexGrow={1} padding={1} flexDirection="column" overflow="hidden">
-				{(autoScroll ? outputLines.slice(-30) : outputLines.slice(0, 30)).map(
-					(line, i) => (
-						<Text key={i}>{line}</Text>
-					),
-				)}
-			</Box>
+			<TabContent
+				key={activeProc?.label ?? 'none'}
+				autoScroll={autoScroll}
+				output={outputLines}
+			/>
 
 			{/* Instructions */}
-			<Box justifyContent="space-between">
-				<Text color="gray">←/→ or 1-9 to switch tabs, 'q' to quit</Text>
-				<Text color="gray">
-					Auto-scroll: {autoScroll ? 'ON' : 'OFF'} (toggle with 'a')
-				</Text>
-			</Box>
+			<Instructions {...{autoScroll}} />
 		</Box>
 	);
 }

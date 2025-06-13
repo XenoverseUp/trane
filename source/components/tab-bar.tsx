@@ -20,6 +20,7 @@ export default function Tabbar({activeIndex, procs}: Props) {
 			borderBottomColor="blueBright"
 			flexDirection="row"
 			justifyContent="space-between"
+			flexShrink={0}
 		>
 			<Box
 				borderRight

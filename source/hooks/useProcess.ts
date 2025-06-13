@@ -3,10 +3,9 @@ import {spawn} from 'child_process';
 import {Command, Proc, ProcStatus} from '../lib/types.js';
 
 export default function useProcesses(commands: Command[]): Proc[] {
-	const [procs, setProcs] = useState<Proc[]>([]);
+	const [procs, setProcs] = useState<(Proc & {buffer?: string})[]>([]);
 
 	useEffect(() => {
-		// Spawn all processes
 		const running = commands.map(cmd => {
 			const child = spawn(cmd.command, cmd.args, {
 				cwd: cmd.cwd,
@@ -18,48 +17,63 @@ export default function useProcesses(commands: Command[]): Proc[] {
 				process: child,
 				output: [] as string[],
 				status: 'running' as ProcStatus,
+				buffer: '', // temporary line buffer
 			};
 		});
 
 		setProcs(running);
 
-		// Attach listeners to each child process
-		running.forEach(p => {
-			const {process: child, label} = p;
+		running.forEach(proc => {
+			const {process: child, label} = proc;
 
-			const appendLine = (line: string) => {
+			const handleChunk = (data: Buffer, isError = false) => {
 				setProcs(prev =>
-					prev.map(pr =>
-						pr.label === label ? {...pr, output: [...pr.output, line]} : pr,
-					),
+					prev.map(p => {
+						if (p.label !== label) return p;
+
+						const raw = (p.buffer ?? '') + data.toString();
+						const parts = raw.split('\n');
+
+						const completedLines = parts
+							.slice(0, -1)
+							.map(line => (isError ? `\u001b[31m${line}` : line));
+
+						return {
+							...p,
+							output: [...p.output, ...completedLines],
+							buffer: parts?.[-1] ?? '',
+						};
+					}),
 				);
 			};
 
-			child.stdout?.on('data', data => {
-				appendLine(data.toString());
-			});
-
-			child.stderr?.on('data', data => {
-				appendLine(`\u001b[31m${data.toString()}\u001b[0m`);
-			});
+			child.stdout?.on('data', data => handleChunk(data, false));
+			child.stderr?.on('data', data => handleChunk(data, true));
 
 			child.on('exit', code => {
-				appendLine(`\n[${label}] exited with code ${code}`);
 				setProcs(prev =>
-					prev.map(pr =>
-						pr.label === label
-							? {...pr, status: code === 0 ? 'success' : 'error'}
-							: pr,
-					),
+					prev.map(p => {
+						if (p.label !== label) return p;
+
+						const flushedLine = p.buffer ? [p.buffer] : [];
+						const exitMsg = `[${label}] exited with code ${code}`;
+
+						return {
+							...p,
+							status: code === 0 ? 'success' : 'error',
+							output: [...p.output, ...flushedLine, exitMsg],
+							buffer: '',
+						};
+					}),
 				);
 			});
 		});
 
-		// Cleanup on unmount or commands change
 		return () => {
 			running.forEach(p => p.process.kill());
 		};
 	}, [commands]);
 
-	return procs;
+	// Strip internal buffer before returning
+	return procs.map(({buffer, ...rest}) => rest);
 }
