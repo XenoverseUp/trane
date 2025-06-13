@@ -95,15 +95,12 @@ function tryLoadCommands(filePath: string): {
 
 const {commands, error} = tryLoadCommands(cli.flags.file);
 
-// Switch to alternate screen buffer
 process.stdout.write('\x1b[?1049h');
 
-// Restore main screen buffer on exit
 process.on('exit', () => {
 	process.stdout.write('\x1b[?1049l');
 });
 
-// Render error or app
 render(
 	<Box width={process.stdout.columns} height={process.stdout.rows}>
 		{error ? (
@@ -117,11 +114,8 @@ render(
 	</Box>,
 );
 
-// Auto exit on key press if there’s an error
 if (error) {
 	process.stdin.setRawMode?.(true);
 	process.stdin.resume();
-	process.stdin.once('data', () => {
-		process.exit(1);
-	});
+	process.stdin.once('data', () => process.exit(1));
 }

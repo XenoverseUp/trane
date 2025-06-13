@@ -91,12 +91,10 @@ export default function useProcesses(commands: Command[]) {
 		return proc;
 	}, []);
 
-	// On mount or commands change: spawn all processes
 	useEffect(() => {
 		const running = commandsRef.current.map(cmd => spawnProcess(cmd));
 		setProcs(running);
 
-		// Cleanup all processes on unmount
 		return () => {
 			running.forEach(p => {
 				if (!p.process.killed) p.process.kill();
@@ -104,7 +102,6 @@ export default function useProcesses(commands: Command[]) {
 		};
 	}, [spawnProcess]);
 
-	// Kill a process by label
 	const killProc = useCallback((label: string) => {
 		setProcs(prev => {
 			return prev.map(p => {
@@ -121,31 +118,25 @@ export default function useProcesses(commands: Command[]) {
 		});
 	}, []);
 
-	// Restart a process by label
 	const restartProc = useCallback(
 		(label: string) => {
 			setProcs(prev => {
-				// Kill old process if running
 				const oldProc = prev.find(p => p.label === label);
 				if (oldProc && !oldProc.process.killed) {
 					oldProc.process.kill();
 				}
 
-				// Find command config for that label
 				const cmd = commandsRef.current.find(c => c.label === label);
 				if (!cmd) return prev;
 
-				// Spawn new process for the label
 				const newProc = spawnProcess(cmd);
 
-				// Replace old proc with new proc
 				return prev.map(p => (p.label === label ? newProc : p));
 			});
 		},
 		[spawnProcess],
 	);
 
-	// Return processes *without* internal buffer, plus control functions
 	const cleanProcs: Proc[] = procs.map(({buffer, ...rest}) => rest);
 
 	return {procs: cleanProcs, killProc, restartProc};
