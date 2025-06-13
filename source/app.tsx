@@ -2,18 +2,16 @@ import React, {useMemo, useState} from 'react';
 import {Box, useApp, useInput} from 'ink';
 
 import Tabbar from './components/tab-bar.js';
-import {Proc} from './lib/types.js';
+import {Command, Proc} from './lib/types.js';
 import useProcesses from './hooks/useProcess.js';
 import TabContent from './components/tab-content.js';
 import Instructions from './components/instructions.js';
 
-const commands = [
-	{label: 'Server', command: 'ls', args: ['-la'], cwd: '.'},
-	{label: 'Dashboard', command: 'sleep', args: ['15'], cwd: '.'},
-	{label: 'Landing', command: 'brew', args: ['install'], cwd: '.'},
-];
+type Props = {
+	commands: Command[];
+};
 
-export default function App() {
+export default function App({commands}: Props) {
 	const {exit} = useApp();
 	const [tabIndex, setTabIndex] = useState(0);
 	const [autoScroll, setAutoScroll] = useState(true);

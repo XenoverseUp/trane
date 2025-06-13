@@ -1,0 +1,4 @@
+[
+	{"label": "Echo", "command": "echo", "args": ["Hello, Trane!"]},
+	{"label": "List", "command": "ls", "args": ["-la"], "cwd": "."}
+]

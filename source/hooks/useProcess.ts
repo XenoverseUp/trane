@@ -55,6 +55,21 @@ export default function useProcesses(commands: Command[]) {
 		child.stdout.on('data', data => handleChunk(data, false));
 		child.stderr.on('data', data => handleChunk(data, true));
 
+		child.on('error', err => {
+			setProcs(prev =>
+				prev.map(p => {
+					if (p.label !== cmd.label) return p;
+
+					const errorMessage = `✖ Failed to start process: ${err.message}`;
+					return {
+						...p,
+						status: 'error',
+						output: [...p.output, errorMessage],
+					};
+				}),
+			);
+		});
+
 		child.on('exit', code => {
 			setProcs(prev =>
 				prev.map(p => {
