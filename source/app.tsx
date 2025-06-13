@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {Box, useApp, useInput} from 'ink';
 
 import Tabbar from './components/tab-bar.js';
@@ -18,7 +18,7 @@ export default function App() {
 	const [tabIndex, setTabIndex] = useState(0);
 	const [autoScroll, setAutoScroll] = useState(true);
 
-	const procs: Proc[] = useProcesses(commands);
+	const {procs, killProc, restartProc} = useProcesses(commands);
 
 	useInput((input, key) => {
 		if (input === 'q') exit();
@@ -35,10 +35,21 @@ export default function App() {
 			const idx = parseInt(input, 10) - 1;
 			if (idx >= 0 && idx < procs.length) setTabIndex(idx);
 		}
+
+		if (input === 'x') {
+			const active = procs[tabIndex];
+			if (active) killProc(active.label);
+		}
+		if (input === 'r') {
+			const active = procs[tabIndex];
+			if (active) restartProc(active.label);
+		}
 	});
 
-	const activeProc: Proc | undefined = procs[tabIndex];
-	const outputLines = activeProc?.output ?? [];
+	const activeProc: Proc | undefined = useMemo(
+		() => procs[tabIndex],
+		[procs, tabIndex],
+	);
 
 	return (
 		<Box flexDirection="column" width="100%" height="100%">
@@ -50,7 +61,7 @@ export default function App() {
 			<TabContent
 				key={activeProc?.label ?? 'none'}
 				autoScroll={autoScroll}
-				output={outputLines}
+				output={activeProc?.output ?? []}
 			/>
 
 			{/* Instructions */}
