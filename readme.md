@@ -7,6 +7,7 @@ Trane is a modern take on parallel task running. The NPM package [Concurrently](
 ## Install
 
 ```bash
+# To be released.
 $ npm install --global trane
 ```
 
@@ -15,7 +16,7 @@ $ npm install --global trane
 ```bash
 $ trane --help
 
- 	Usage
+	Usage
     $ trane [options]
 
   Options
