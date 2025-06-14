@@ -1,4 +1,3 @@
-import React from 'react';
 import {Badge} from '@inkjs/ui';
 import {Box, Text} from 'ink';
 import {Proc} from '../lib/types.js';

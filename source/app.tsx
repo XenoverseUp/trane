@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react';
+import {useMemo, useState} from 'react';
 import {Box, useApp, useInput} from 'ink';
 
 import Tabbar from './components/tab-bar.js';
