@@ -44,5 +44,6 @@ $ trane --help
 - Export output logs.
 - Clear output buffer.
 - Timestamps.
+- Provide both config based and cli based command running.
 
 Muhammed Can Durmus | 2025
