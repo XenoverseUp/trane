@@ -1,8 +1,45 @@
 {
-	"name": "trane",
+	"name": "@xenoverseup/trane",
 	"version": "0.0.0",
 	"license": "MIT",
-	"bin": "dist/cli.js",
+	"bin": {
+		"trane": "dist/cli.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/XenoverseUp/trane.git"
+	},
+	"bugs": {
+		"url": "https://github.com/XenoverseUp/trane/issues"
+	},
+	"homepage": "https://github.com/XenoverseUp/trane#readme",
+	"description": "A modern parallel task runner CLI built with native Node.",
+	"keywords": [
+		"cli",
+		"terminal",
+		"command-line",
+		"tool",
+		"automation",
+		"task-runner",
+		"parallel",
+		"concurrent",
+		"process",
+		"job-runner",
+		"run-tasks",
+		"async",
+		"ink",
+		"react",
+		"typescript",
+		"nodejs",
+		"esm",
+		"meow",
+		"interactive-cli",
+		"build-tools",
+		"developer-tools",
+		"project-tools",
+		"trane",
+		"xenoverseup"
+	],
 	"type": "module",
 	"engines": {
 		"node": ">=16"
@@ -18,7 +55,6 @@
 	"dependencies": {
 		"@inkjs/ui": "^2.0.0",
 		"ink": "^5.2.1",
-		"ink-use-stdout-dimensions": "^1.0.5",
 		"meow": "^11.0.0",
 		"react": "^18.2.0"
 	},
