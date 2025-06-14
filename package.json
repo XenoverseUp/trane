@@ -1,6 +1,6 @@
 {
 	"name": "@xenoverseup/trane",
-	"version": "0.0.0",
+	"version": "0.0.1",
 	"license": "MIT",
 	"bin": {
 		"trane": "dist/cli.js"
