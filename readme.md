@@ -98,4 +98,5 @@ If your editor supports it, enable auto-completion and type-checking:
 ---
 
 [Muhammed Can Durmus](https://github.com/xenoverseup) · 2025
+
 Licensed under the [MIT License](./LICENSE).
