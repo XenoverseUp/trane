@@ -1,4 +1,4 @@
-# Trane &middot; [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/xenoverseup/trane/blob/main/LICENSE) [![npm version](https://img.shields.io/npm/v/@xenoverseup/trane)](https://www.npmjs.com/package/@xenoverseup/trane)
+# Trane &middot; [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/xenoverseup/trane/blob/main/LICENSE) [![npm version](https://img.shields.io/npm/v/@xenoverseup/trane?color=blue)](https://www.npmjs.com/package/@xenoverseup/trane)
 
 **Trane** is a modern CLI for running parallel tasks with a user-friendly TUI.
 Think [Concurrently](https://www.npmjs.com/package/concurrently), but with a better interface, alias support, runtime validation, and developer-first ergonomics.
