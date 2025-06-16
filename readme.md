@@ -1,49 +1,101 @@
-# Trane &middot; [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/xenoverseup/trane/blob/main/LICENSE) [![npm version](https://img.shields.io/npm/v/react.svg?style=flat)](https://www.npmjs.com/package/@xenoverseup/trane)
+# Trane &middot; [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/xenoverseup/trane/blob/main/LICENSE) [![npm version](https://img.shields.io/npm/v/@xenoverseup/trane)](https://www.npmjs.com/package/@xenoverseup/trane)
 
-Trane is a modern take on parallel task running. The NPM package [Concurrently](https://www.npmjs.com/package/concurrently) is pretty popular in Node environment. However, it doesn't provide a user-friendly DX and UX. Trane aims to provide a similar functionality with a config based approach and a nicer TUI on top.
+**Trane** is a modern CLI for running parallel tasks with a user-friendly TUI.
+Think [Concurrently](https://www.npmjs.com/package/concurrently), but with a better interface, alias support, runtime validation, and developer-first ergonomics.
 
-<img src="./docs/showcase.gif" alt="The usage of Trane." />
+<p align="center">
+  <img src="./docs/showcase.gif" alt="Trane showcase" width="700" />
+</p>
 
 ## Install
 
 ```bash
-$ npm install --global trane
-```
-
-## CLI
-
-```bash
-$ trane --help
-
-	Usage
-    $ trane [options]
-
-  Options
-    --file, -f     Path to command JSON file (default: ./trane.json)
-    --version, -v  Show CLI version
-    --help, -h     Show this help
-
-  Example
-    $ trane --file=./my-commands.json
+npm install --global @xenoverseup/trane
 ```
 
 ## Usage
 
-## Technicality & Implementation
+```bash
+trane --help
+```
 
-### Technologies:
+### CLI Options
 
-## Todo:
+```
+Usage
+  $ trane [options] [alias]
 
-- Runtime safety for `trane.json` files.
-- Define config in the `trane.json`.
-- Better handling of scroll area.
-- Help screen for commands.
-- Support native buffer format.
-- Modes for interaction and commands.
-- Export output logs.
-- Clear output buffer.
-- Timestamps.
-- Provide both config based and cli based command running.
+Options
+  --file, -f     Path to command config (default: ./trane.json)
+  --list         List all available aliases
+  --version, -v  Show CLI version
+  --help, -h     Show CLI help
 
-Muhammed Can Durmus | 2025
+Examples
+  $ trane                # Launch interactive TUI from trane.json
+  $ trane --file=custom.json
+  $ trane --list         # Show all available aliases
+  $ trane build          # Run alias "build" defined in config
+```
+
+## Config File (`trane.json`)
+
+Define tasks in a config file:
+
+```json
+[
+	{
+		"label": "Dev Server",
+		"command": "npm",
+		"args": ["run", "dev"],
+		"alias": "dev"
+	},
+	{
+		"label": "Type Check",
+		"command": "tsc",
+		"args": ["--watch"],
+		"alias": "ts"
+	}
+]
+```
+
+### Types Safety for `trane.json`
+
+If your editor supports it, enable auto-completion and type-checking:
+
+```jsonc
+// @ts-check
+// @type {import('@xenoverseup/trane/trane-config').default}
+[
+	{
+		"label": "Dev Server",
+		"command": "npm",
+		"args": ["run", "dev"],
+		"alias": "dev"
+	}
+]
+```
+
+## Features
+
+- **Config-first** setup using `trane.json`
+- **Alias mode** for instant command execution
+- **Runtime validation** of configs
+- **Interactive TUI** with scrollable panes
+- **`--list`** command to preview available tasks
+- **Works out of the box** — no extra setup needed
+- **Command logs** displayed side by side
+
+## TODO Roadmap
+
+- [ ] Export logs to file
+- [ ] Timestamp each output
+- [ ] Native buffer support
+- [ ] Clear/reset output buffer
+- [ ] Dual modes: interactive / headless
+- [ ] Autocomplete alias names
+
+---
+
+[Muhammed Can Durmus](https://github.com/xenoverseup) · 2025
+Licensed under the [MIT License](./LICENSE).
