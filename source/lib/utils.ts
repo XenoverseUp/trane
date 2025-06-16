@@ -35,7 +35,7 @@ export function tryLoadCommands(filePath: string): {
 	if (!fs.existsSync(resolvedPath)) {
 		return {
 			commands: [],
-			error: `✖ File not found: ${resolvedPath}`,
+			error: `✖ Couldn't find the config: ${resolvedPath}`,
 		};
 	}
 
@@ -67,7 +67,7 @@ export function tryLoadCommands(filePath: string): {
 	} catch (err) {
 		return {
 			commands: [],
-			error: `✖ Failed to parse JSON: ${(err as Error).message}.`,
+			error: `✖ Failed to parse the config: ${(err as Error).message}.`,
 		};
 	}
 }
