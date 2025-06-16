@@ -60,7 +60,7 @@ Define tasks in a config file:
 ]
 ```
 
-### Types Safety for `trane.json`
+### Types for `trane.json`
 
 If your editor supports it, enable auto-completion and type-checking:
 
@@ -76,16 +76,6 @@ If your editor supports it, enable auto-completion and type-checking:
 	}
 ]
 ```
-
-## Features
-
-- **Config-first** setup using `trane.json`
-- **Alias mode** for instant command execution
-- **Runtime validation** of configs
-- **Interactive TUI** with scrollable panes
-- **`--list`** command to preview available tasks
-- **Works out of the box** — no extra setup needed
-- **Command logs** displayed side by side
 
 ## TODO Roadmap
 
