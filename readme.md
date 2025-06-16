@@ -48,7 +48,8 @@ Define tasks in a config file:
 		"label": "Dev Server",
 		"command": "npm",
 		"args": ["run", "dev"],
-		"alias": "dev"
+		"alias": "dev",
+		"cwd": "./client"
 	},
 	{
 		"label": "Type Check",
