@@ -1,7 +1,7 @@
 # Trane &middot; [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/xenoverseup/trane/blob/main/LICENSE) [![npm version](https://img.shields.io/npm/v/@xenoverseup/trane?color=blue)](https://www.npmjs.com/package/@xenoverseup/trane) [![Downloads/week](https://img.shields.io/npm/dw/@xenoverseup/trane)](https://www.npmjs.com/package/@xenoverseup/trane) [![Stars](https://img.shields.io/github/stars/xenoverseup/trane?style=social)](https://github.com/xenoverseup/trane/stargazers)
 
 **Trane** is a modern CLI for running parallel tasks with a user-friendly TUI.
-Think [Concurrently](https://www.npmjs.com/package/concurrently), but with a better interface, alias support, runtime validation, and developer-first ergonomics.
+Think [Concurrently](https://www.npmjs.com/package/concurrently), but with a better interface, alias support, runtime validation, and developer-first ergonomics. Create `trane.json` file in the root directory. Define commands and the working directories. Then simply run `trane`.
 
 <p align="center">
   <img src="./docs/showcase.gif" alt="Trane showcase" width="700" />
