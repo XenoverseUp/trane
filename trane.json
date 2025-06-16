@@ -1,6 +1,17 @@
 [
-	{"label": "Echo", "command": "echo", "args": ["Hello, Trane!"]},
+	{
+		"label": "Echo",
+		"alias": "echo",
+		"command": "echo",
+		"args": ["Hello, Trane!"]
+	},
 	{"label": "List", "command": "ls", "args": ["-la"], "cwd": "."},
 	{"label": "Sleep", "command": "sleep", "args": ["15"], "cwd": "."},
-	{"label": "Brew", "command": "brew", "args": ["upgrade"], "cwd": "."}
+	{
+		"label": "Brew",
+		"alias": "brew",
+		"command": "brew",
+		"args": ["upgrade"],
+		"cwd": "."
+	}
 ]

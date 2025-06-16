@@ -1,16 +1,15 @@
 #!/usr/bin/env node
 
-import {render, Box, Text} from 'ink';
-import fs from 'fs';
-import path from 'path';
+import {render, Box} from 'ink';
 import meow from 'meow';
 import App from './app.js';
-import {Command} from './lib/types.js';
+import {tryLoadCommands} from './lib/utils.js';
+import Error from './error.js';
 
 const cli = meow(
 	`
   Usage
-    $ trane [options]
+    $ trane [options] [alias]
 
   Options
     --file, -f     Path to command JSON file (default: ./trane.json)
@@ -19,6 +18,7 @@ const cli = meow(
 
   Example
     $ trane --file=./my-commands.json
+    $ trane build
 `,
 	{
 		importMeta: import.meta,
@@ -32,6 +32,10 @@ const cli = meow(
 				type: 'boolean',
 				alias: 'h',
 			},
+			list: {
+				type: 'boolean',
+				alias: 'l',
+			},
 			version: {
 				type: 'boolean',
 				alias: 'v',
@@ -43,79 +47,81 @@ const cli = meow(
 	},
 );
 
-if (cli.flags.help) {
-	cli.showHelp();
-	process.exit(0);
-}
-
-if (cli.flags.version) {
-	cli.showVersion();
-	process.exit(0);
-}
-
-function tryLoadCommands(filePath: string): {
-	commands: Command[];
-	error?: string;
-} {
-	const resolvedPath = path.resolve(process.cwd(), filePath);
-
-	if (!fs.existsSync(resolvedPath)) {
-		return {
-			commands: [],
-			error: `❌ File not found: ${resolvedPath}`,
-		};
+(function main() {
+	if (cli.flags.help) {
+		cli.showHelp();
+		return;
 	}
 
-	try {
-		const raw = fs.readFileSync(resolvedPath, 'utf8');
-		const parsed = JSON.parse(raw);
+	if (cli.flags.version) {
+		cli.showVersion();
+		return;
+	}
 
-		if (!Array.isArray(parsed)) {
-			return {
-				commands: [],
-				error: `❌ JSON must be an array of command objects.`,
-			};
+	const {commands, error} = tryLoadCommands(cli.flags.file);
+
+	/* Error TUI */
+
+	if (error) {
+		process.stdout.write('\x1b[?1049h');
+		process.on('exit', () => process.stdout.write('\x1b[?1049l'));
+
+		render(
+			<Box width={process.stdout.columns} height={process.stdout.rows}>
+				<Error error={error} />
+			</Box>,
+		);
+
+		return;
+	}
+
+	/* Alias Listing */
+
+	if (cli.flags.list) {
+		const listing = commands.filter(cmd => cmd.alias);
+
+		if (listing.length === 0) {
+			console.log('\nNo defined aliases command.');
+			console.log('');
+			return;
 		}
 
-		const commands = parsed.map((cmd, i) => ({
-			label: cmd.label ?? `Command ${i + 1}`,
-			command: String(cmd.command),
-			args: Array.isArray(cmd.args) ? cmd.args.map(String) : [],
-			cwd: cmd.cwd ?? process.cwd(),
-		}));
+		console.log('\nAvailable Commands:\n');
+		listing.forEach(cmd => {
+			const command = [cmd.command, ...(cmd?.args ?? [])].join(' ');
+			return console.log(`- ${cmd.alias?.padEnd(12)} → ${command}`);
+		});
 
-		return {commands};
-	} catch (err) {
-		return {
-			commands: [],
-			error: `❌ Failed to parse JSON: ${(err as Error).message}`,
-		};
+		console.log('');
+		return;
 	}
-}
 
-const {commands, error} = tryLoadCommands(cli.flags.file);
+	/* Alias Mode */
 
-process.stdout.write('\x1b[?1049h');
+	if (cli.input.length > 0) {
+		const alias = cli.input[0];
+		const command = commands.find(c => c.alias === alias);
+		if (!command) {
+			console.error(`✖ No command found with alias "${alias}"`);
+			process.exit(1);
+		}
+		import('./runner.js')
+			.then(({runCommand}) => runCommand(command))
+			.catch(err => {
+				console.error('✖ Failed to run command:', err.message);
+				process.exit(1);
+			});
 
-process.on('exit', () => {
-	process.stdout.write('\x1b[?1049l');
-});
+		return;
+	}
 
-render(
-	<Box width={process.stdout.columns} height={process.stdout.rows}>
-		{error ? (
-			<Box flexDirection="column" padding={1}>
-				<Text color="redBright">{error}</Text>
-				<Text color="gray">Press any key to exit...</Text>
-			</Box>
-		) : (
+	/* TUI Mode */
+	process.stdout.write('\x1b[?1049h');
+	process.on('exit', () => process.stdout.write('\x1b[?1049l'));
+
+	render(
+		<Box width={process.stdout.columns} height={process.stdout.rows}>
 			<App commands={commands} />
-		)}
-	</Box>,
-);
-
-if (error) {
-	process.stdin.setRawMode?.(true);
-	process.stdin.resume();
-	process.stdin.once('data', () => process.exit(1));
-}
+		</Box>,
+	);
+})();
