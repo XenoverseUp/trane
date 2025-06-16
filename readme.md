@@ -44,18 +44,18 @@ Define tasks in a config file:
 
 ```json
 [
-	{
-		"label": "Dev Server",
-		"command": "npm",
-		"args": ["run", "dev"],
-		"alias": "dev"
-	},
-	{
-		"label": "Type Check",
-		"command": "tsc",
-		"args": ["--watch"],
-		"alias": "ts"
-	}
+  {
+    "label": "Dev Server",
+    "command": "npm",
+    "args": ["run", "dev"],
+    "alias": "dev"
+  },
+  {
+    "label": "Type Check",
+    "command": "tsc",
+    "args": ["--watch"],
+    "alias": "ts"
+  }
 ]
 ```
 
@@ -67,12 +67,12 @@ If your editor supports it, enable auto-completion and type-checking:
 // @ts-check
 // @type {import('@xenoverseup/trane/trane-config').default}
 [
-	{
-		"label": "Dev Server",
-		"command": "npm",
-		"args": ["run", "dev"],
-		"alias": "dev"
-	}
+  {
+    "label": "Dev Server",
+    "command": "npm",
+    "args": ["run", "dev"],
+    "alias": "dev"
+  }
 ]
 ```
 
