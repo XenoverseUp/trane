@@ -2,6 +2,7 @@ package trane
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	"github.com/charmbracelet/lipgloss"
@@ -57,8 +58,26 @@ func (m *model) renderViewport() {
 	_, headerHeight := m.renderHeader()
 	_, infoBarHeight := m.renderInfoBar()
 
-	viewportHeight := max(m.height - headerHeight - infoBarHeight, 1)
+	viewportHeight := max(m.height-headerHeight-infoBarHeight, 1)
 	m.viewport = viewport.New(m.width, viewportHeight)
+	m.updateViewportContent()
+}
+
+func (m *model) updateViewportContent() {
+	tab := m.tabs[m.activeTab]
+	var content strings.Builder
+	switch tab.state {
+	case running:
+		content.WriteString(fmt.Sprintf("%s CMD: `%s`\n", m.spinner.View(), tab.Command))
+	case success:
+		content.WriteString(fmt.Sprintf("Finished: %s\n", tab.Command))
+	case err:
+		content.WriteString(fmt.Sprintf("Error: %s\n", tab.Command))
+	}
+	if tab.output != "" {
+		content.WriteString("\n" + tab.output)
+	}
+	m.viewport.SetContent(content.String())
 }
 
 

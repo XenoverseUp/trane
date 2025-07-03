@@ -34,6 +34,8 @@ type model struct {
 	height    int
 	spinner   spinner.Model
 	viewport  viewport.Model
+
+	outputCh  chan outputMsg
 }
 
 type outputMsg struct {

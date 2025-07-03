@@ -15,7 +15,7 @@
       "label": "Brew Upgrade",
       "command": "brew",
       "args": ["upgrade"],
-      "cwd": "./src"
+      "cwd": "."
     }
   }
 }
