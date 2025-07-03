@@ -5,6 +5,7 @@ import (
 	"os/exec"
 
 	"github.com/charmbracelet/bubbles/spinner"
+	"github.com/charmbracelet/bubbles/viewport"
 )
 
 type CommandState int
@@ -27,8 +28,10 @@ type tab struct {
 type model struct {
 	tabs      []tab
 	activeTab int
-	spinner   spinner.Model
 	width     int
+	height    int
+	spinner   spinner.Model
+	viewport  viewport.Model
 }
 
 type outputMsg struct {

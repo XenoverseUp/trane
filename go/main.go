@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/bubbles/spinner"
+	"github.com/charmbracelet/bubbles/viewport"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -31,14 +33,17 @@ func initialModel() model {
 	return m
 }
 
-func (m model) Init() tea.Cmd {
-	var cmds []tea.Cmd
-	cmds = append(cmds, m.spinner.Tick)
+func (m *model) InitViewport() {
+	_, headerHeight := m.renderHeader()
+	_, infoBarHeight := m.renderInfoBar()
 
-	// Start all commands
-	// for i := range m.tabs {
-	// 	cmds = append(cmds, runCommand(i, m.tabs[i].command))
-	// }
+	viewportHeight := max(m.height - headerHeight - infoBarHeight, 1)
+	m.viewport = viewport.New(m.width, viewportHeight)
+}
+
+
+func (m model) Init() tea.Cmd {
+	cmds := []tea.Cmd{m.spinner.Tick}
 
 	return tea.Batch(cmds...)
 }
@@ -62,6 +67,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.activeTab = ((m.activeTab - 1) + len(m.tabs)) % len(m.tabs)
 		}
 
+
 	case outputMsg:
 		tab := &m.tabs[msg.index]
 		tab.output += msg.line + "\n"
@@ -82,76 +88,52 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
+		m.height = msg.Height
+		m.InitViewport()
 	}
+
+	tab := m.tabs[m.activeTab]
+
+	var content strings.Builder
+	switch tab.state {
+ 	  case running:
+  		content.WriteString(fmt.Sprintf("%s Running: %s\n", m.spinner.View(), tab.command))
+   	case success:
+  		content.WriteString(fmt.Sprintf("Finished: %s\n", tab.command))
+   	case err:
+  		content.WriteString(fmt.Sprintf("Error: %s\n", tab.command))
+	}
+
+	if tab.output != "" {
+		content.WriteString("\n" + tab.output)
+	}
+
+	var cmd tea.Cmd
+
+	m.viewport.SetContent(content.String())
+	m.viewport, cmd = m.viewport.Update(msg)
+	cmds = append(cmds, cmd)
 
 	return m, tea.Batch(cmds...)
 }
 
 func (m model) View() string {
-	var b strings.Builder
+  var b strings.Builder
 
-	// --- Header Section ---
+	header, _ := m.renderHeader()
+	infoBar, _ := m.renderInfoBar()
 
-	traneStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#00FFAA")).
-		Background(lipgloss.Color("#000000")).
-		Padding(0, 1).
-		Border(lipgloss.NormalBorder(), false, true, false, false).
-		BorderForeground(lipgloss.Color("#555555"))
-
-	traneText := traneStyle.Render("⛬ Trane")
-
-	// Render tabs
-	var tabLabels []string
-	for i, t := range m.tabs {
-		label := fmt.Sprintf("%d) %s ", i+1, t.title)
-		if i == m.activeTab {
-
-			label += "✔ "
-			tabLabels = append(tabLabels, activeTabStyle.Render(label))
-		} else {
-			tabLabels = append(tabLabels, inactiveTabStyle.Render(label))
-		}
-	}
-	tabsContent := lipgloss.JoinHorizontal(lipgloss.Left, tabLabels...)
-
-
-	remainingWidth := max(m.width - lipgloss.Width(traneText) - lipgloss.Width(tabsContent), 0)
-
-	headerRow := lipgloss.JoinHorizontal(
-		lipgloss.Left,
-		traneText,
-		lipgloss.NewStyle().Width(remainingWidth).Render(""),
-		tabsContent,
-	)
-
-	headerWithBorder := lipgloss.NewStyle().
-		Border(lipgloss.NormalBorder(), false, false, true, false).
-		BorderForeground(lipgloss.Color("#555555")).
-		Width(m.width).
-		Render(headerRow)
-
-	b.WriteString(headerWithBorder)
+	b.WriteString(header)
 	b.WriteString("\n")
 
-	// --- Main Content Section ---
+	b.WriteString(m.viewport.View())
+	b.WriteString("\n")
 
-	tab := m.tabs[m.activeTab]
-	if tab.state == running {
-		b.WriteString(fmt.Sprintf("%s Running: %s\n", m.spinner.View(), tab.command))
-	} else if tab.state == success {
-		b.WriteString(fmt.Sprintf("Finished: %s\n", tab.command))
-	} else if tab.state == err {
-		b.WriteString(fmt.Sprintf("Error: %s\n", tab.command))
-	}
+	b.WriteString(infoBar)
 
-	if tab.output != "" {
-		b.WriteString("\n" + tab.output)
-	}
-
-	b.WriteString("\n\n←/→ or 1-9 to switch tabs, 'q' to quit.")
 	return b.String()
 }
+
 
 var (
 	activeTabStyle = lipgloss.NewStyle().
