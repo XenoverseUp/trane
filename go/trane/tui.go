@@ -2,6 +2,8 @@ package trane
 
 import (
 	"fmt"
+	"math/rand"
+	"strconv"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/spinner"
@@ -27,57 +29,71 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "q", "ctrl+c":
-			return m, tea.Quit
-		case "1", "2", "3", "4":
-			idx := int(msg.String()[0] - '1')
-			if idx >= 0 && idx < len(m.tabs) {
-				m.activeTab = idx
-			}
-		case "right":
-			m.activeTab = (m.activeTab + 1) % len(m.tabs)
-		case "left":
-			m.activeTab = ((m.activeTab - 1) + len(m.tabs)) % len(m.tabs)
-		}
-
-	case tea.MouseMsg:
-		if msg.Action != tea.MouseActionRelease || msg.Button != tea.MouseButtonLeft {
-			return m, nil
-		}
-
-		for i := range m.tabs {
-  		if zone.Get(fmt.Sprintf("tab:%d", i)).InBounds(msg) {
-  			m.activeTab = i
+	  /* Click Event */
+  	case tea.KeyMsg:
+  		switch msg.String() {
+    		case "q", "ctrl+c":
+   			  return m, tea.Quit
+    		case "1", "2", "3", "4":
+     			idx := int(msg.String()[0] - '1')
+     			if idx >= 0 && idx < len(m.tabs) {
+      				m.activeTab = idx
+     			}
+    		case "right":
+   			  m.activeTab = (m.activeTab + 1) % len(m.tabs)
+    		case "left":
+   			  m.activeTab = ((m.activeTab - 1) + len(m.tabs)) % len(m.tabs)
+    		case "j":
+          tab := &m.tabs[m.activeTab]
+      		tab.output += "Hello World! "+ strconv.Itoa(rand.Int()) + "\n"
   		}
-		}
 
-		return m, nil
+    /* Mouse Event */
+		case tea.MouseMsg:
+ 			if msg.Action == tea.MouseAction(tea.MouseButtonWheelUp) {
+				m.viewport.ScrollUp(1)
+				return m, nil
+ 			}
+ 			if msg.Action ==  tea.MouseAction(tea.MouseButtonWheelDown) {
+				m.viewport.ScrollDown(1)
+				return m, nil
+ 			}
 
+ 			if msg.Action == tea.MouseActionRelease && msg.Button == tea.MouseButtonLeft {
+				for i := range m.tabs {
+ 					if zone.Get(fmt.Sprintf("tab:%d", i)).InBounds(msg) {
+						m.activeTab = i
+ 					}
+				}
+				return m, nil
+ 			}
 
-	case outputMsg:
-		tab := &m.tabs[msg.index]
-		tab.output += msg.line + "\n"
+    /* I/O Event */
 
-	case doneMsg:
-		tab := &m.tabs[msg.index]
+  	case outputMsg:
+  		tab := &m.tabs[msg.index]
+  		tab.output += msg.line + "\n"
 
-		if msg.err != nil {
-			tab.state = err
-		} else {
-			tab.state = success
-		}
+  	case doneMsg:
+  		tab := &m.tabs[msg.index]
 
-	case spinner.TickMsg:
-		var cmd tea.Cmd
-		m.spinner, cmd = m.spinner.Update(msg)
-		cmds = append(cmds, cmd)
+  		if msg.err != nil {
+  			tab.state = err
+  		} else {
+  			tab.state = success
+  		}
 
-	case tea.WindowSizeMsg:
-		m.width = msg.Width
-		m.height = msg.Height
-		m.renderViewport()
+  	case spinner.TickMsg:
+  		var cmd tea.Cmd
+  		m.spinner, cmd = m.spinner.Update(msg)
+  		cmds = append(cmds, cmd)
+
+    /* Resize Event */
+
+  	case tea.WindowSizeMsg:
+  		m.width = msg.Width
+  		m.height = msg.Height
+  		m.renderViewport()
 	}
 
 	tab := m.tabs[m.activeTab]
