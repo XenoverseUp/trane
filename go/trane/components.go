@@ -1,4 +1,4 @@
-package main
+package trane
 
 import (
 	"fmt"
@@ -21,7 +21,7 @@ func (m model) renderHeader() (string, int) {
 
 	var tabLabels []string
 	for i, t := range m.tabs {
-		label := fmt.Sprintf("%d) %s ", i+1, t.title)
+		label := fmt.Sprintf("%d) %s ", i+1, t.Title)
 		if i == m.activeTab {
 			label += "✔ "
 			tabLabels = append(tabLabels, activeTabStyle.Render(label))

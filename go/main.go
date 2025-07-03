@@ -1,170 +1,120 @@
 package main
 
 import (
+	"encoding/json"
+	"flag"
 	"fmt"
-	"strings"
+	"log"
+	"os"
+	"path/filepath"
 
-	"github.com/charmbracelet/bubbles/spinner"
-	"github.com/charmbracelet/bubbles/viewport"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
-
-	zone "github.com/lrstanley/bubblezone"
+	"github.com/xenoverseup/trane"
 )
 
-var _ tea.Model = model{}
+const version = "0.0.13"
 
-func initialModel() model {
-	tabs := []tab{
-		{title: "Echo", command: "echo Hello"},
-		{title: "List", command: "ls -al"},
-		{title: "Sleep", command: "sleep 2"},
-		{title: "Brew", command: "brew help"},
-	}
-
-	s := spinner.New()
-	s.Spinner = spinner.Meter
-
-	m := model{
-		tabs:      tabs,
-		activeTab: 0,
-		spinner:   s,
-	}
-
-	return m
+type Task struct {
+	Label   string   `json:"label"`
+	Command string   `json:"command"`
+	Args    []string `json:"args"`
+	CWD     string   `json:"cwd,omitempty"`
 }
 
-func (m *model) InitViewport() {
-	_, headerHeight := m.renderHeader()
-	_, infoBarHeight := m.renderInfoBar()
-
-	viewportHeight := max(m.height - headerHeight - infoBarHeight, 1)
-	m.viewport = viewport.New(m.width, viewportHeight)
+type Config struct {
+	Tasks map[string]Task `json:"tasks"`
 }
-
-
-func (m model) Init() tea.Cmd {
-	cmds := []tea.Cmd{m.spinner.Tick}
-
-	return tea.Batch(cmds...)
-}
-
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmds []tea.Cmd
-
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "q", "ctrl+c":
-			return m, tea.Quit
-		case "1", "2", "3", "4":
-			idx := int(msg.String()[0] - '1')
-			if idx >= 0 && idx < len(m.tabs) {
-				m.activeTab = idx
-			}
-		case "right":
-			m.activeTab = (m.activeTab + 1) % len(m.tabs)
-		case "left":
-			m.activeTab = ((m.activeTab - 1) + len(m.tabs)) % len(m.tabs)
-		}
-
-	case tea.MouseMsg:
-		if msg.Action != tea.MouseActionRelease || msg.Button != tea.MouseButtonLeft {
-			return m, nil
-		}
-
-		for i := range m.tabs {
-  		if zone.Get(fmt.Sprintf("tab:%d", i)).InBounds(msg) {
-  			m.activeTab = i
-  		}
-		}
-
-		return m, nil
-
-
-	case outputMsg:
-		tab := &m.tabs[msg.index]
-		tab.output += msg.line + "\n"
-
-	case doneMsg:
-		tab := &m.tabs[msg.index]
-
-		if msg.err != nil {
-			tab.state = err
-		} else {
-			tab.state = success
-		}
-
-	case spinner.TickMsg:
-		var cmd tea.Cmd
-		m.spinner, cmd = m.spinner.Update(msg)
-		cmds = append(cmds, cmd)
-
-	case tea.WindowSizeMsg:
-		m.width = msg.Width
-		m.height = msg.Height
-		m.InitViewport()
-	}
-
-	tab := m.tabs[m.activeTab]
-
-	var content strings.Builder
-	switch tab.state {
- 	  case running:
-  		content.WriteString(fmt.Sprintf("%s CMD: `%s`\n", m.spinner.View(), tab.command))
-   	case success:
-  		content.WriteString(fmt.Sprintf("Finished: %s\n", tab.command))
-   	case err:
-  		content.WriteString(fmt.Sprintf("Error: %s\n", tab.command))
-	}
-
-	if tab.output != "" {
-		content.WriteString("\n" + tab.output)
-	}
-
-	var cmd tea.Cmd
-
-	m.viewport.SetContent(content.String())
-	m.viewport, cmd = m.viewport.Update(msg)
-	cmds = append(cmds, cmd)
-
-	return m, tea.Batch(cmds...)
-}
-
-func (m model) View() string {
-  var b strings.Builder
-
-	header, _ := m.renderHeader()
-	infoBar, _ := m.renderInfoBar()
-
-	b.WriteString(header)
-	b.WriteString("\n")
-
-	b.WriteString(m.viewport.View())
-	b.WriteString("\n")
-
-	b.WriteString(infoBar)
-
-	return zone.Scan(b.String())
-}
-
 
 var (
-	activeTabStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#000000")).
-			Background(lipgloss.Color("#00FFAA")).
-			Padding(0, 1).
-			BorderForeground(lipgloss.Color("#00FFAA"))
+	filePath = flag.String("file", "trane.json", "Path to command JSON file")
+	vFlag    = flag.Bool("version", false, "Show CLI version")
+	hFlag    = flag.Bool("help", false, "Show help")
 
-	inactiveTabStyle = lipgloss.NewStyle().
-				Foreground(lipgloss.Color("#888888")).
-				Padding(0, 1)
+	fShort = flag.String("f", "", "Shorthand for --file")
+	vShort = flag.Bool("v", false, "Shorthand for --version")
+	hShort = flag.Bool("h", false, "Shorthand for --help")
 )
 
+func printHelp() {
+	fmt.Println(`Usage:
+  trane [options] [alias]
+
+Options:
+  --file, -f     Path to command JSON file (default: ./trane.json)
+  --version, -v  Show CLI version
+  --help, -h     Show this help
+
+Examples:
+  trane --file=./my-commands.json
+  trane build`)
+}
+
 func main() {
-  zone.NewGlobal()
-	p := tea.NewProgram(initialModel(), tea.WithAltScreen(), tea.WithMouseCellMotion())
-	if _, err := p.Run(); err != nil {
-		fmt.Println("Error:", err)
+	flag.Parse()
+
+	if *hFlag || *hShort {
+		printHelp()
+		return
 	}
+	if *vFlag || *vShort {
+		fmt.Println(version)
+		return
+	}
+
+	actualFile := *filePath
+	if *fShort != "" {
+		actualFile = *fShort
+	}
+	jsonPath, err := filepath.Abs(actualFile)
+	if err != nil {
+		log.Fatalf("Error resolving file path: %v", err)
+	}
+
+	data, err := os.ReadFile(jsonPath)
+	if err != nil {
+		log.Fatalf("Error reading JSON file: %v", err)
+	}
+
+	var config Config
+	if err := json.Unmarshal(data, &config); err != nil {
+		log.Fatalf("Error parsing JSON: %v", err)
+	}
+
+
+	args := flag.Args()
+
+	/* Alias Mode */
+
+	if len(args) > 0 {
+  	alias := args[0]
+  	task, ok := config.Tasks[alias]
+  	if !ok {
+  		log.Fatalf("Alias %q not found in %s", alias, actualFile)
+  	}
+  	cwd := task.CWD
+  	if cwd == "" {
+  		cwd = "."
+  	}
+  	fmt.Printf("Parsed task [%s]: %s %v (cwd: %s)\n", alias, task.Command, task.Args, cwd)
+	}
+
+	/* TUI Mode */
+
+	var tabs = []trane.Tab{}
+
+	for _, task := range config.Tasks {
+
+  	cwd := task.CWD
+  	if cwd == "" {
+  		cwd = "."
+  	}
+
+    tabs = append(tabs, trane.Tab{
+     	Title:   task.Label,
+     	Command: task.Command,
+     	Args:    task.Args,
+     	Cwd:     cwd,
+    })
+	}
+
+	trane.CreateTrane(tabs)
 }

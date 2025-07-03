@@ -1,4 +1,4 @@
-package main
+package trane
 
 import (
 	"context"
@@ -8,25 +8,27 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 )
 
-type CommandState int
+type commandState int
 
 const (
-	running CommandState = iota
+	running commandState = iota
 	err
 	success
 )
 
-type tab struct {
-	title      string
-	command    string
+type Tab struct {
+	Title      string
+	Command    string
+	Args       []string
+	Cwd        string
 	output     string
-	state      CommandState
+	state      commandState
 	cmd        *exec.Cmd
 	cancelFunc context.CancelFunc
 }
 
 type model struct {
-	tabs      []tab
+	tabs      []Tab
 	activeTab int
 	width     int
 	height    int

@@ -1,0 +1,21 @@
+{
+  "tasks": {
+    "echo": {
+      "label": "Echo",
+      "command": "echo",
+      "args": ["Hello World!"],
+      "cwd": "."
+    },
+    "list": {
+      "label": "List",
+      "command": "ls",
+      "args": ["-la"]
+    },
+    "upgrade": {
+      "label": "Brew Upgrade",
+      "command": "brew",
+      "args": ["upgrade"],
+      "cwd": "./src"
+    }
+  }
+}
