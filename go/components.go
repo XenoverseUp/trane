@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/charmbracelet/lipgloss"
+	zone "github.com/lrstanley/bubblezone"
 )
 
 
@@ -25,7 +26,7 @@ func (m model) renderHeader() (string, int) {
 			label += "✔ "
 			tabLabels = append(tabLabels, activeTabStyle.Render(label))
 		} else {
-			tabLabels = append(tabLabels, inactiveTabStyle.Render(label))
+			tabLabels = append(tabLabels, zone.Mark(fmt.Sprintf("tab:%d", i), inactiveTabStyle.Render(label)))
 		}
 	}
 	tabsContent := lipgloss.JoinHorizontal(lipgloss.Left, tabLabels...)

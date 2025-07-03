@@ -6,9 +6,10 @@ import (
 
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/viewport"
-
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+
+	zone "github.com/lrstanley/bubblezone"
 )
 
 var _ tea.Model = model{}
@@ -22,7 +23,7 @@ func initialModel() model {
 	}
 
 	s := spinner.New()
-	s.Spinner = spinner.Dot
+	s.Spinner = spinner.Meter
 
 	m := model{
 		tabs:      tabs,
@@ -67,6 +68,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.activeTab = ((m.activeTab - 1) + len(m.tabs)) % len(m.tabs)
 		}
 
+	case tea.MouseMsg:
+		if msg.Action != tea.MouseActionRelease || msg.Button != tea.MouseButtonLeft {
+			return m, nil
+		}
+
+		for i := range m.tabs {
+  		if zone.Get(fmt.Sprintf("tab:%d", i)).InBounds(msg) {
+  			m.activeTab = i
+  		}
+		}
+
+		return m, nil
+
 
 	case outputMsg:
 		tab := &m.tabs[msg.index]
@@ -97,7 +111,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var content strings.Builder
 	switch tab.state {
  	  case running:
-  		content.WriteString(fmt.Sprintf("%s Running: %s\n", m.spinner.View(), tab.command))
+  		content.WriteString(fmt.Sprintf("%s CMD: `%s`\n", m.spinner.View(), tab.command))
    	case success:
   		content.WriteString(fmt.Sprintf("Finished: %s\n", tab.command))
    	case err:
@@ -131,7 +145,7 @@ func (m model) View() string {
 
 	b.WriteString(infoBar)
 
-	return b.String()
+	return zone.Scan(b.String())
 }
 
 
@@ -148,7 +162,8 @@ var (
 )
 
 func main() {
-	p := tea.NewProgram(initialModel(), tea.WithAltScreen())
+  zone.NewGlobal()
+	p := tea.NewProgram(initialModel(), tea.WithAltScreen(), tea.WithMouseCellMotion())
 	if _, err := p.Run(); err != nil {
 		fmt.Println("Error:", err)
 	}
