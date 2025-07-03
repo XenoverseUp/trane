@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/bubbles/spinner"
-	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 
 	zone "github.com/lrstanley/bubblezone"
@@ -13,20 +12,16 @@ import (
 
 var _ tea.Model = model{}
 
-func (m *model) InitViewport() {
-	_, headerHeight := m.renderHeader()
-	_, infoBarHeight := m.renderInfoBar()
 
-	viewportHeight := max(m.height - headerHeight - infoBarHeight, 1)
-	m.viewport = viewport.New(m.width, viewportHeight)
-}
-
+/*** Init ***/
 
 func (m model) Init() tea.Cmd {
 	cmds := []tea.Cmd{m.spinner.Tick}
 
 	return tea.Batch(cmds...)
 }
+
+/*** Update ***/
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
@@ -82,7 +77,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
-		m.InitViewport()
+		m.renderViewport()
 	}
 
 	tab := m.tabs[m.activeTab]
@@ -110,6 +105,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
+/*** View ***/
+
 func (m model) View() string {
   var b strings.Builder
 
@@ -129,20 +126,21 @@ func (m model) View() string {
 
 
 func CreateTrane(tabs []Tab) {
-
   s := spinner.New()
 	s.Spinner = spinner.Meter
 
-	m := model{
+	var m = model{
 		tabs:      tabs,
 		activeTab: 0,
 		spinner:   s,
 	}
 
-
   zone.NewGlobal()
-	p := tea.NewProgram(m, tea.WithAltScreen(), tea.WithMouseCellMotion())
-	if _, err := p.Run(); err != nil {
+
+	program := tea.NewProgram(m, tea.WithAltScreen(), tea.WithMouseCellMotion())
+	_, err := program.Run()
+
+	if err != nil {
 		fmt.Println("Error:", err)
 	}
 }
