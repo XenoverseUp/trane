@@ -2,12 +2,12 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 
+	"github.com/spf13/cobra"
 	"github.com/xenoverseup/trane"
 )
 
@@ -25,96 +25,101 @@ type Config struct {
 }
 
 var (
-	filePath = flag.String("file", "trane.json", "Path to command JSON file")
-	vFlag    = flag.Bool("version", false, "Show CLI version")
-	hFlag    = flag.Bool("help", false, "Show help")
-
-	fShort = flag.String("f", "", "Shorthand for --file")
-	vShort = flag.Bool("v", false, "Shorthand for --version")
-	hShort = flag.Bool("h", false, "Shorthand for --help")
+	file       string
+	showVersion bool
+	cfg        Config
+	jsonPath   string
 )
 
-func printHelp() {
-	fmt.Println(`Usage:
-  trane [options] [alias]
+var rootCmd = &cobra.Command{
+	Use:   "trane",
+	Short: "Trane - Run aliases or launch the interactive TUI",
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		if showVersion {
+			fmt.Println(version)
+			os.Exit(0)
+		}
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		loadConfig()
 
-Options:
-  --file, -f     Path to command JSON file (default: ./trane.json)
-  --version, -v  Show CLI version
-  --help, -h     Show this help
+		// TUI mode
+		var tabs []trane.Tab
+		for _, task := range cfg.Tasks {
+			cwd := task.CWD
+			if cwd == "" {
+				cwd = "."
+			}
+			tabs = append(tabs, trane.Tab{
+				Title:   task.Label,
+				Command: task.Command,
+				Args:    task.Args,
+				Cwd:     cwd,
+			})
+		}
 
-Examples:
-  trane --file=./my-commands.json
-  trane build`)
+		trane.CreateTrane(tabs)
+	},
 }
 
-func main() {
-	flag.Parse()
 
-	if *hFlag || *hShort {
-		printHelp()
-		return
-	}
-	if *vFlag || *vShort {
+var runCmd = &cobra.Command{
+	Use:   "run <alias>",
+	Short: "Run a single alias from the config file",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		loadConfig()
+
+		alias := args[0]
+		task, ok := cfg.Tasks[alias]
+		if !ok {
+			log.Fatalf("Alias %q not found in %s", alias, jsonPath)
+		}
+
+		cwd := task.CWD
+		if cwd == "" {
+			cwd = "."
+		}
+		fmt.Printf("Parsed task [%s]: %s %v (cwd: %s)\n", alias, task.Command, task.Args, cwd)
+
+	},
+}
+
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "Show CLI version",
+	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(version)
-		return
-	}
+	},
+}
 
-	actualFile := *filePath
-	if *fShort != "" {
-		actualFile = *fShort
-	}
-	jsonPath, err := filepath.Abs(actualFile)
+func loadConfig() {
+	var err error
+	jsonPath, err = filepath.Abs(file)
 	if err != nil {
 		log.Fatalf("Error resolving file path: %v", err)
 	}
 
 	data, err := os.ReadFile(jsonPath)
 	if err != nil {
-		log.Fatalf("Error reading JSON file: %v", err)
+		log.Fatalf("Error reading file %s: %v", jsonPath, err)
 	}
 
-	var config Config
-	if err := json.Unmarshal(data, &config); err != nil {
+	if err := json.Unmarshal(data, &cfg); err != nil {
 		log.Fatalf("Error parsing JSON: %v", err)
 	}
+}
 
+func init() {
+	rootCmd.PersistentFlags().StringVarP(&file, "file", "f", "trane.json", "Path to command JSON file")
+	rootCmd.PersistentFlags().BoolVarP(&showVersion, "version", "v", false, "Show CLI version")
 
-	args := flag.Args()
+	rootCmd.AddCommand(runCmd)
+	rootCmd.AddCommand(versionCmd)
+}
 
-	/* Alias Mode */
-
-	if len(args) > 0 {
-  	alias := args[0]
-  	task, ok := config.Tasks[alias]
-  	if !ok {
-  		log.Fatalf("Alias %q not found in %s", alias, actualFile)
-  	}
-  	cwd := task.CWD
-  	if cwd == "" {
-  		cwd = "."
-  	}
-  	fmt.Printf("Parsed task [%s]: %s %v (cwd: %s)\n", alias, task.Command, task.Args, cwd)
+func main() {
+	if err := rootCmd.Execute(); err != nil {
+		os.Exit(1)
 	}
-
-	/* TUI Mode */
-
-	var tabs = []trane.Tab{}
-
-	for _, task := range config.Tasks {
-
-  	cwd := task.CWD
-  	if cwd == "" {
-  		cwd = "."
-  	}
-
-    tabs = append(tabs, trane.Tab{
-     	Title:   task.Label,
-     	Command: task.Command,
-     	Args:    task.Args,
-     	Cwd:     cwd,
-    })
-	}
-
-	trane.CreateTrane(tabs)
 }
