@@ -1,4 +1,4 @@
-module github.com/xenoverseup
+module github.com/xenoverseup/trane
 
 go 1.24.4
 

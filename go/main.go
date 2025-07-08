@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/spf13/cobra"
-	"github.com/xenoverseup/trane"
+	"github.com/xenoverseup/trane/tui"
 )
 
 const version = "0.0.13"
@@ -46,7 +46,7 @@ var rootCmd = &cobra.Command{
 		// TUI mode
 		configDir := filepath.Dir(jsonPath)
 
-    var tabs []trane.Tab
+    var tabs []tui.Tab
     for _, task := range cfg.Tasks {
    			cwd := task.CWD
    			if cwd == "" {
@@ -55,7 +55,7 @@ var rootCmd = &cobra.Command{
     				cwd = filepath.Join(configDir, cwd)
    			}
 
-   			tab := trane.Tab{
+   			tab := tui.Tab{
     				Title:   task.Label,
     				Command: task.Command,
     				Args:    task.Args,
@@ -65,7 +65,7 @@ var rootCmd = &cobra.Command{
    			tabs = append(tabs, tab)
     }
 
-    trane.CreateTrane(tabs)
+    tui.CreateTrane(tabs)
 
 	},
 }

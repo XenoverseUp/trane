@@ -1,4 +1,4 @@
-package trane
+package tui
 
 import "github.com/charmbracelet/bubbles/spinner"
 

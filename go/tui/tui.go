@@ -4,7 +4,7 @@
 // TODO: Graceful errors
 // TODO: ASCII art help
 
-package trane
+package tui
 
 import (
 	"fmt"
