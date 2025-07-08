@@ -12,12 +12,12 @@ import (
 
 func (m model) renderHeader() (string, int) {
 	traneStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#000000")).
-		Background(lightPurple).
+		Foreground(Black).
+		Background(Accent).
 		Padding(0, 1).
 		MarginLeft(1).
 		Border(lipgloss.MarkdownBorder(), false, true, false, false).
-		BorderForeground(lipgloss.Color("#555555"))
+		BorderForeground(GrayLight)
 
 	traneText := traneStyle.Render("⛬ TRANE")
 
@@ -25,7 +25,7 @@ func (m model) renderHeader() (string, int) {
 	for i, t := range m.tabs {
 		label := fmt.Sprintf("(%d) %s %s", i+1, t.Title, getStateIcon(t.state))
 		if i == m.activeTab {
-			tabLabels = append(tabLabels, activeTabStyle.Render(label))
+			tabLabels = append(tabLabels, activeTabStyle(t.state).Render(label))
 		} else {
 			tabLabels = append(tabLabels, zone.Mark(fmt.Sprintf("tab:%d", i), inactiveTabStyle.Render(label)))
 		}
@@ -47,7 +47,7 @@ func (m model) renderHeader() (string, int) {
 
 	headerWithBorder := lipgloss.NewStyle().
 		Border(lipgloss.NormalBorder(), false, false, true, false).
-		BorderForeground(lightPurple).
+		BorderForeground(Accent).
 		Width(m.width).
 		Render(headerRow)
 
@@ -84,7 +84,7 @@ func (m *model) updateViewportContent() {
 func (m model) renderInfoBar() (string, int) {
 	infoBar := "←/→ or 1-9 to switch tabs, 'q' to quit."
 	infoBarStyled := lipgloss.NewStyle().
-		Foreground(lightGray).
+		Foreground(GrayLight).
 		Padding(0, 1).
 		Render(infoBar)
 

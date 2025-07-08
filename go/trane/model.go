@@ -2,7 +2,6 @@ package trane
 
 import (
 	"context"
-	"os/exec"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/viewport"
@@ -23,19 +22,17 @@ type Tab struct {
 	Cwd        string
 	output     string
 	state      commandState
-	cmd        *exec.Cmd
+
 	cancelFunc context.CancelFunc
 }
 
 type model struct {
-	tabs      []Tab
+	tabs      []*Tab
 	activeTab int
 	width     int
 	height    int
 	spinner   spinner.Model
 	viewport  viewport.Model
-
-	outputCh  chan outputMsg
 }
 
 type outputMsg struct {

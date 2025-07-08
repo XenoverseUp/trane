@@ -20,13 +20,6 @@ var _ tea.Model = model{}
 
 func (m model) Init() tea.Cmd {
 	cmds := []tea.Cmd{m.spinner.Tick}
-
-	m.outputCh = make(chan outputMsg, 100)
-
-	for range m.tabs {
-	  continue
-	}
-
 	return tea.Batch(cmds...)
 }
 
@@ -44,7 +37,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.tabs[i].cancelFunc()
 				}
 			}
-			// close(m.outputCh)
 			return m, tea.Quit
 		case "1", "2", "3", "4":
 			idx := int(msg.String()[0] - '1')
@@ -56,7 +48,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "left":
 			m.activeTab = ((m.activeTab - 1) + len(m.tabs)) % len(m.tabs)
 		case "j":
-			tab := &m.tabs[m.activeTab]
+			tab := m.tabs[m.activeTab]
 			tab.output += "Hello World! " + strconv.Itoa(rand.Int()) + "\n"
 		}
 
@@ -79,14 +71,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case outputMsg:
-		tab := &m.tabs[msg.index]
+		tab := m.tabs[msg.index]
 		tab.output += msg.line + "\n"
 		if msg.index == m.activeTab {
 			m.updateViewportContent()
 		}
 
 	case doneMsg:
-		tab := &m.tabs[msg.index]
+		tab := m.tabs[msg.index]
 		if msg.err != nil {
 			tab.state = err
 			tab.output += fmt.Sprintf("\nError: %v\n", msg.err)
@@ -139,11 +131,18 @@ func (m model) View() string {
 
 
 func CreateTrane(tabs []Tab) {
+
+  tabsPtrs := make([]*Tab, len(tabs))
+  for i := range tabs {
+    tabsPtrs[i] = &tabs[i]
+  }
+
+
   s := spinner.New()
 	s.Spinner = spinner.Meter
 
 	var m = model{
-		tabs:      tabs,
+		tabs:      tabsPtrs,
 		activeTab: 0,
 		spinner:   s,
 	}
@@ -151,6 +150,10 @@ func CreateTrane(tabs []Tab) {
   zone.NewGlobal()
 
 	program := tea.NewProgram(m, tea.WithAltScreen(), tea.WithMouseCellMotion())
+
+
+	run(m.tabs, program)
+
 	_, err := program.Run()
 
 	if err != nil {
