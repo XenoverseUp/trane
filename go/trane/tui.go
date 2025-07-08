@@ -139,7 +139,7 @@ func CreateTrane(tabs []Tab) {
 
 
   s := spinner.New()
-	s.Spinner = spinner.Meter
+	s.Spinner = spinner.MiniDot
 
 	var m = model{
 		tabs:      tabsPtrs,

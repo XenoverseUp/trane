@@ -15,7 +15,7 @@ func (m model) renderHeader() (string, int) {
 		Foreground(Black).
 		Background(Accent).
 		Padding(0, 1).
-		MarginLeft(1).
+
 		Border(lipgloss.MarkdownBorder(), false, true, false, false).
 		BorderForeground(GrayLight)
 
@@ -23,7 +23,7 @@ func (m model) renderHeader() (string, int) {
 
 	var tabLabels []string
 	for i, t := range m.tabs {
-		label := fmt.Sprintf("(%d) %s %s", i+1, t.Title, getStateIcon(t.state))
+		label := fmt.Sprintf("(%d) %s %s", i+1, t.Title, getStateIcon(t.state, &m.spinner))
 		if i == m.activeTab {
 			tabLabels = append(tabLabels, activeTabStyle(t.state).Render(label))
 		} else {
@@ -58,7 +58,7 @@ func (m *model) renderViewport() {
 	_, headerHeight := m.renderHeader()
 	_, infoBarHeight := m.renderInfoBar()
 
-	viewportHeight := max(m.height-headerHeight-infoBarHeight, 1)
+	viewportHeight := max(m.height - headerHeight - infoBarHeight, 1)
 	m.viewport = viewport.New(m.width, viewportHeight)
 	m.updateViewportContent()
 }
@@ -66,16 +66,9 @@ func (m *model) renderViewport() {
 func (m *model) updateViewportContent() {
 	tab := m.tabs[m.activeTab]
 	var content strings.Builder
-	switch tab.state {
-	case running:
-		content.WriteString(fmt.Sprintf("%s CMD: `%s`\n", m.spinner.View(), tab.Command))
-	case success:
-		content.WriteString(fmt.Sprintf("Finished: %s\n", tab.Command))
-	case err:
-		content.WriteString(fmt.Sprintf("Error: %s\n", tab.Command))
-	}
+
 	if tab.output != "" {
-		content.WriteString("\n" + tab.output)
+		content.WriteString(tab.output)
 	}
 	m.viewport.SetContent(content.String())
 }
@@ -86,6 +79,10 @@ func (m model) renderInfoBar() (string, int) {
 	infoBarStyled := lipgloss.NewStyle().
 		Foreground(GrayLight).
 		Padding(0, 1).
+		Border(lipgloss.ASCIIBorder(), true, false, false, false).
+		BorderForeground(GrayDark).
+		Width(m.width).
+
 		Render(infoBar)
 
 	return infoBarStyled, lipgloss.Height(infoBarStyled)

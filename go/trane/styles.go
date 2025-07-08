@@ -19,7 +19,7 @@ var (
 
 
 var inactiveTabStyle = lipgloss.NewStyle().
-				Foreground(GrayDark).
+				Foreground(GrayLight).
 				Padding(0, 1)
 
 
