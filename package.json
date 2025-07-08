@@ -3,7 +3,7 @@
 	"version": "0.0.12",
 	"license": "MIT",
 	"bin": {
-		"trane": "dist/cli.js"
+		"trane": "npm/cli.js"
 	},
 	"repository": {
 		"type": "git",
@@ -13,7 +13,7 @@
 		"url": "https://github.com/XenoverseUp/trane/issues"
 	},
 	"homepage": "https://github.com/XenoverseUp/trane#readme",
-	"description": "A modern parallel task runner CLI built with native Node.",
+	"description": "A modern parallel task runner CLI built with Go.",
 	"keywords": [
 		"cli",
 		"terminal",
@@ -38,21 +38,29 @@
 		"developer-tools",
 		"project-tools",
 		"trane",
-		"xenoverseup"
+		"xenoverseup",
+		"go",
+		"bubble-tea"
 	],
 	"type": "module",
 	"engines": {
 		"node": ">=16"
 	},
 	"scripts": {
-		"build": "tsc",
-		"dev": "tsc --watch",
-		"test": "prettier --check . && xo && ava"
-	},
-	"files": [
-		"dist",
-		"trane-config.d.ts"
-	],
+    "build:osx": "cd go && GOOS=darwin GOARCH=amd64 go build -o trane-darwin",
+    "build:linux": "cd go && GOOS=linux GOARCH=amd64 go build -o trane-linux",
+    "build:windows": "cd go && GOOS=windows GOARCH=amd64 go build -o trane-win.exe",
+    "build": "npm run build:osx && npm run build:linux && npm run build:windows",
+    "prepublish": "npm run build",
+    "postinstall": "chmod +x go/trane-* || true"
+  },
+  "files": [
+    "go/trane-darwin",
+    "go/trane-linux",
+    "go/trane-win.exe",
+    "npm/cli.js",
+    "trane-config.d.ts"
+  ],
 	"types": "trane-config.d.ts",
 	"exports": {
 		".": {
