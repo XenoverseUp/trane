@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"context"
 	"os/exec"
-	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -18,7 +17,8 @@ func run(tabs []*Tab, program *tea.Program) {
 			ctx, cancel := context.WithCancel(context.Background())
 			tab.cancelFunc = cancel
 
-			cmd := exec.CommandContext(ctx, "bash", "-c", tab.Command + " " + strings.Join(tab.Args, " "))
+			cmd := exec.CommandContext(ctx, tab.Command, tab.Args...)
+			cmd.Dir = tab.Cwd
 
 			stdoutPipe, err := cmd.StdoutPipe()
 			if err != nil {

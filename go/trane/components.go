@@ -2,11 +2,11 @@ package trane
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	"github.com/charmbracelet/lipgloss"
 	zone "github.com/lrstanley/bubblezone"
+	"github.com/muesli/reflow/wordwrap"
 )
 
 
@@ -65,12 +65,13 @@ func (m *model) renderViewport() {
 
 func (m *model) updateViewportContent() {
 	tab := m.tabs[m.activeTab]
-	var content strings.Builder
+	var content string
 
 	if tab.output != "" {
-		content.WriteString(tab.output)
+		content = wordwrap.String(tab.output, m.viewport.Width)
 	}
-	m.viewport.SetContent(content.String())
+
+	m.viewport.SetContent(content)
 }
 
 
@@ -79,7 +80,7 @@ func (m model) renderInfoBar() (string, int) {
 	infoBarStyled := lipgloss.NewStyle().
 		Foreground(GrayLight).
 		Padding(0, 1).
-		Border(lipgloss.ASCIIBorder(), true, false, false, false).
+		Border(lipgloss.MarkdownBorder(), true, false, false, false).
 		BorderForeground(GrayDark).
 		Width(m.width).
 

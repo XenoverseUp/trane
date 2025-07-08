@@ -44,21 +44,29 @@ var rootCmd = &cobra.Command{
 		loadConfig()
 
 		// TUI mode
-		var tabs []trane.Tab
-		for _, task := range cfg.Tasks {
-			cwd := task.CWD
-			if cwd == "" {
-				cwd = "."
-			}
-			tabs = append(tabs, trane.Tab{
-				Title:   task.Label,
-				Command: task.Command,
-				Args:    task.Args,
-				Cwd:     cwd,
-			})
-		}
+		configDir := filepath.Dir(jsonPath)
 
-		trane.CreateTrane(tabs)
+    var tabs []trane.Tab
+    for _, task := range cfg.Tasks {
+   			cwd := task.CWD
+   			if cwd == "" {
+    				cwd = configDir
+   			} else if !filepath.IsAbs(cwd) {
+    				cwd = filepath.Join(configDir, cwd)
+   			}
+
+   			tab := trane.Tab{
+    				Title:   task.Label,
+    				Command: task.Command,
+    				Args:    task.Args,
+    				Cwd:     cwd,
+   			}
+
+   			tabs = append(tabs, tab)
+    }
+
+    trane.CreateTrane(tabs)
+
 	},
 }
 
@@ -77,11 +85,13 @@ var runCmd = &cobra.Command{
 		}
 
 		cwd := task.CWD
-		if cwd == "" {
-			cwd = "."
-		}
-		fmt.Printf("Parsed task [%s]: %s %v (cwd: %s)\n", alias, task.Command, task.Args, cwd)
+    if cwd == "" {
+ 			cwd = filepath.Dir(jsonPath)
+    } else if !filepath.IsAbs(cwd) {
+ 			cwd = filepath.Join(filepath.Dir(jsonPath), cwd)
+    }
 
+		fmt.Printf("Parsed task [%s]: %s %v (cwd: %s)\n", alias, task.Command, task.Args, cwd)
 	},
 }
 

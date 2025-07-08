@@ -118,6 +118,8 @@ func (m model) View() string {
 	header, _ := m.renderHeader()
 	infoBar, _ := m.renderInfoBar()
 
+	zone.Scan(header)
+
 	b.WriteString(header)
 	b.WriteString("\n")
 
@@ -126,7 +128,7 @@ func (m model) View() string {
 
 	b.WriteString(infoBar)
 
-	return zone.Scan(b.String())
+	return b.String()
 }
 
 
@@ -155,6 +157,11 @@ func CreateTrane(tabs []Tab) {
 	run(m.tabs, program)
 
 	_, err := program.Run()
+
+	// TODO: Sanitize Full Screen
+	// TODO: Handle quitting
+	// TODO: Graceful errors
+	// TODO: ASCII art help
 
 	if err != nil {
 		fmt.Println("Error:", err)
