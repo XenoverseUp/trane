@@ -1,0 +1,24 @@
+version: 2
+
+project_name: trane
+
+builds:
+  - id: trane
+    main: ./main.go
+    dir: ./go
+    binary: trane
+    goos: [darwin, linux, windows]
+    goarch: [amd64, arm64]
+    ldflags: "-s -w"
+
+archives:
+  - id: binaries
+    name_template: "{{ .Os }}-{{ .Arch }}"
+    format: tar.gz
+    files:
+      - trane
+
+snapshot:
+  name_template: "{{ .Tag }}-snapshot"
+
+dist: npm/bin

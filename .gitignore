@@ -22,6 +22,7 @@ profile.cov
 vendor/
 
 trane
+bin
 
 
 # Go workspace file
