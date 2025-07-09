@@ -2,18 +2,46 @@
   "name": "@xenoverseup/trane",
   "version": "0.0.12",
   "license": "MIT",
-  "bin": {
-    "trane": "npm/cli.js"
-  },
+  "homepage": "https://github.com/XenoverseUp/trane#readme",
+  "description": "A modern parallel task runner CLI built with Go.",
   "repository": {
     "type": "git",
     "url": "https://github.com/XenoverseUp/trane.git"
   },
   "bugs": {
+    "email": "xenoverseup@gmail.com",
     "url": "https://github.com/XenoverseUp/trane/issues"
   },
-  "homepage": "https://github.com/XenoverseUp/trane#readme",
-  "description": "A modern parallel task runner CLI built with Go.",
+  "type": "module",
+  "bin": {
+    "trane": "npm/cli.js"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "scripts": {
+    "build": "goreleaser build --snapshot --clean",
+    "prepublish": "npm run build",
+    "postinstall": "node npm/postinstall.js"
+  },
+  "files": [
+    "npm/cli.js",
+    "npm/bin/",
+    "trane-config.d.ts"
+  ],
+  "types": "trane-config.d.ts",
+  "exports": {
+    ".": {
+      "import": "./npm/cli.js",
+      "types": "./trane-config.d.ts"
+    },
+    "./config": {
+      "types": "./trane-config.d.ts"
+    }
+  },
+  "dependencies": {
+    "glob": "^11.0.3"
+  },
   "keywords": [
     "cli",
     "terminal",
@@ -39,32 +67,5 @@
     "xenoverseup",
     "go",
     "bubble-tea"
-  ],
-  "type": "module",
-  "engines": {
-    "node": ">=16"
-  },
-  "scripts": {
-    "build": "cd go && GOOS=js GOARCH=wasm go build -o ../npm/trane.wasm",
-    "prepublish": "npm run build"
-  },
-  "files": [
-    "npm/cli.js",
-    "npm/bin/",
-    "trane-config.d.ts"
-  ],
-  "types": "trane-config.d.ts",
-  "exports": {
-    ".": {
-      "import": "./npm/cli.js",
-      "types": "./trane-config.d.ts"
-    },
-    "./config": {
-      "types": "./trane-config.d.ts"
-    }
-  },
-  "dependencies": {
-    "glob": "^11.0.3"
-  },
-  "devDependencies": {}
+  ]
 }
