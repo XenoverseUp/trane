@@ -2,6 +2,7 @@ package tui
 
 import (
 	"context"
+	"os/exec"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/viewport"
@@ -24,6 +25,8 @@ type Tab struct {
 	state      commandState
 
 	cancelFunc context.CancelFunc
+	pid        int
+	cmd        *exec.Cmd
 }
 
 type model struct {

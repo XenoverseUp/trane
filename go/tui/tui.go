@@ -18,14 +18,13 @@ import (
 var _ tea.Model = model{}
 
 func CreateTrane(tabs []Tab) {
+	tabsPtrs := make([]*Tab, len(tabs))
+	for i := range tabs {
+		tabsPtrs[i] = &tabs[i]
+	}
 
-  tabsPtrs := make([]*Tab, len(tabs))
-  for i := range tabs {
-    tabsPtrs[i] = &tabs[i]
-  }
 
-
-  s := spinner.New()
+  	s := spinner.New()
 	s.Spinner = spinner.MiniDot
 
 	var m = model{
@@ -34,7 +33,7 @@ func CreateTrane(tabs []Tab) {
 		spinner:   s,
 	}
 
-  zone.NewGlobal()
+  	zone.NewGlobal()
 
 	program := tea.NewProgram(m, tea.WithAltScreen(), tea.WithMouseCellMotion())
 

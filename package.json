@@ -20,7 +20,7 @@
     "node": ">=16"
   },
   "scripts": {
-    "build": "goreleaser build --snapshot --clean",
+    "build": "goreleaser release --snapshot --clean",
     "prepublish": "npm run build",
     "postinstall": "node npm/postinstall.js"
   },

@@ -21,9 +21,12 @@ builds:
 archives:
   - id: binaries
     name_template: "{{ .Os }}-{{ .Arch }}"
-    formats: [tar.gz]
+    # formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: ["zip"]
     files:
-      - trane
+      - npm/bin/trane_{{ .Os }}_{{ .Arch }}_v*/trane*
 
 snapshot:
   version_template: "{{ .Tag }}-snapshot"
