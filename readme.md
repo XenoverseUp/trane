@@ -43,21 +43,27 @@ Examples
 Define tasks in a config file:
 
 ```json
-[
-	{
-		"label": "Dev Server",
-		"command": "npm",
-		"args": ["run", "dev"],
-		"alias": "dev",
-		"cwd": "./client"
-	},
-	{
-		"label": "Type Check",
-		"command": "tsc",
-		"args": ["--watch"],
-		"alias": "ts"
-	}
-]
+{
+  "tasks": {
+    "server": {
+      "label": "Server",
+      "command": "bun",
+      "args": ["run", "dev"]
+    },
+    "dashboard": {
+      "label": "Dashboard",
+      "command": "bun",
+      "args": ["dev"],
+      "cwd": "./www/dashboard"
+    },
+    "landing": {
+      "label": "Landing",
+      "command": "npm",
+      "args": ["run", "dev"],
+      "cwd": "./www/landing"
+    }
+  }
+}
 ```
 
 ### Types for `trane.json`
@@ -67,18 +73,14 @@ If your editor supports it, enable auto-completion and type-checking:
 ```jsonc
 // @ts-check
 // @type {import('@xenoverseup/trane/config').default}
-[
-	{
-		"label": "Dev Server",
-		"command": "npm",
-		"args": ["run", "dev"],
-		"alias": "dev"
-	}
-]
+{
+  "tasks": {...}
+}
 ```
 
 ## TODO Roadmap
 
+- [x] Go migration
 - [ ] Export logs to file
 - [ ] Timestamp each output
 - [ ] Native buffer support
