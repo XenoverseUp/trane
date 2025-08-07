@@ -17,6 +17,7 @@ import (
 func run(tabs []*Tab, program *tea.Program) {
 	for i, tab := range tabs {
 		i := i
+
 		tab := tab
 
 		go func() {
@@ -57,13 +58,13 @@ func run(tabs []*Tab, program *tea.Program) {
 				cmd.Process.Kill()
 			}
 
-			go func () {
+			go func() {
 				scanner := bufio.NewScanner(stdoutPipe)
 				for scanner.Scan() {
 					program.Send(outputMsg{index: i, line: scanner.Text()})
 				}
 			}()
-			go func () {
+			go func() {
 				scanner := bufio.NewScanner(stderrPipe)
 				for scanner.Scan() {
 					program.Send(outputMsg{index: i, line: scanner.Text()})

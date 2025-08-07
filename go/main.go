@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -25,10 +24,10 @@ type Config struct {
 }
 
 var (
-	file       string
+	file        string
 	showVersion bool
-	cfg        Config
-	jsonPath   string
+	cfg         Config
+	jsonPath    string
 )
 
 var rootCmd = &cobra.Command{
@@ -46,30 +45,29 @@ var rootCmd = &cobra.Command{
 		// TUI mode
 		configDir := filepath.Dir(jsonPath)
 
-    var tabs []tui.Tab
-    for _, task := range cfg.Tasks {
-   			cwd := task.CWD
-   			if cwd == "" {
-    				cwd = configDir
-   			} else if !filepath.IsAbs(cwd) {
-    				cwd = filepath.Join(configDir, cwd)
-   			}
+		var tabs []tui.Tab
+		for _, task := range cfg.Tasks {
+			cwd := task.CWD
+			if cwd == "" {
+				cwd = configDir
+			} else if !filepath.IsAbs(cwd) {
+				cwd = filepath.Join(configDir, cwd)
+			}
 
-   			tab := tui.Tab{
-    				Title:   task.Label,
-    				Command: task.Command,
-    				Args:    task.Args,
-    				Cwd:     cwd,
-   			}
+			tab := tui.Tab{
+				Title:   task.Label,
+				Command: task.Command,
+				Args:    task.Args,
+				Cwd:     cwd,
+			}
 
-   			tabs = append(tabs, tab)
-    }
+			tabs = append(tabs, tab)
+		}
 
-    tui.CreateTrane(tabs)
+		tui.CreateTrane(tabs)
 
 	},
 }
-
 
 var runCmd = &cobra.Command{
 	Use:   "run <alias>",
@@ -81,15 +79,16 @@ var runCmd = &cobra.Command{
 		alias := args[0]
 		task, ok := cfg.Tasks[alias]
 		if !ok {
-			log.Fatalf("Alias %q not found in %s", alias, jsonPath)
+			fmt.Printf("Alias %q not found in %s", alias, jsonPath)
+			os.Exit(0)
 		}
 
 		cwd := task.CWD
-    if cwd == "" {
- 			cwd = filepath.Dir(jsonPath)
-    } else if !filepath.IsAbs(cwd) {
- 			cwd = filepath.Join(filepath.Dir(jsonPath), cwd)
-    }
+		if cwd == "" {
+			cwd = filepath.Dir(jsonPath)
+		} else if !filepath.IsAbs(cwd) {
+			cwd = filepath.Join(filepath.Dir(jsonPath), cwd)
+		}
 
 		fmt.Printf("Parsed task [%s]: %s %v (cwd: %s)\n", alias, task.Command, task.Args, cwd)
 	},
@@ -107,16 +106,19 @@ func loadConfig() {
 	var err error
 	jsonPath, err = filepath.Abs(file)
 	if err != nil {
-		log.Fatalf("Error resolving file path: %v", err)
+		fmt.Printf("Error resolving the file path `%s`.\n", jsonPath)
+		os.Exit(0)
 	}
 
 	data, err := os.ReadFile(jsonPath)
 	if err != nil {
-		log.Fatalf("Error reading file %s: %v", jsonPath, err)
+		fmt.Printf("Config find the config file `%s`.\n", jsonPath)
+		os.Exit(0)
 	}
 
 	if err := json.Unmarshal(data, &cfg); err != nil {
-		log.Fatalf("Error parsing JSON: %v", err)
+		fmt.Printf("Error parsing JSON: %v\n", err)
+		os.Exit(0)
 	}
 }
 

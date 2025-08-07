@@ -17,12 +17,12 @@ const (
 )
 
 type Tab struct {
-	Title      string
-	Command    string
-	Args       []string
-	Cwd        string
-	output     string
-	state      commandState
+	Title   string
+	Command string
+	Args    []string
+	Cwd     string
+	output  string
+	state   commandState
 
 	cancelFunc context.CancelFunc
 	pid        int

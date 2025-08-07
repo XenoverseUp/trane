@@ -6,9 +6,8 @@ import (
 	zone "github.com/lrstanley/bubblezone"
 )
 
-
 func (m model) View() string {
-  var b strings.Builder
+	var b strings.Builder
 
 	header, _ := m.renderHeader()
 	infoBar, _ := m.renderInfoBar()

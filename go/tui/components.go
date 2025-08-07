@@ -9,13 +9,11 @@ import (
 	"github.com/muesli/reflow/wordwrap"
 )
 
-
 func (m model) renderHeader() (string, int) {
 	traneStyle := lipgloss.NewStyle().
 		Foreground(Black).
 		Background(Accent).
 		Padding(0, 1).
-
 		Border(lipgloss.MarkdownBorder(), false, true, false, false).
 		BorderForeground(GrayLight)
 
@@ -32,9 +30,9 @@ func (m model) renderHeader() (string, int) {
 	}
 
 	tabsContent := lipgloss.JoinHorizontal(lipgloss.Left, tabLabels[0])
-  for _, label := range tabLabels[1:] {
-      tabsContent += " " + label
-  }
+	for _, label := range tabLabels[1:] {
+		tabsContent += " " + label
+	}
 
 	remainingWidth := max(m.width-lipgloss.Width(traneText)-lipgloss.Width(tabsContent), 0)
 
@@ -58,7 +56,7 @@ func (m *model) renderViewport() {
 	_, headerHeight := m.renderHeader()
 	_, infoBarHeight := m.renderInfoBar()
 
-	viewportHeight := max(m.height - headerHeight - infoBarHeight, 1)
+	viewportHeight := max(m.height-headerHeight-infoBarHeight, 1)
 	m.viewport = viewport.New(m.width, viewportHeight)
 	m.updateViewportContent()
 }
@@ -74,7 +72,6 @@ func (m *model) updateViewportContent() {
 	m.viewport.SetContent(content)
 }
 
-
 func (m model) renderInfoBar() (string, int) {
 	infoBar := "←/→ or 1-9 to switch tabs, 'q' to quit."
 	infoBarStyled := lipgloss.NewStyle().
@@ -83,7 +80,6 @@ func (m model) renderInfoBar() (string, int) {
 		Border(lipgloss.MarkdownBorder(), true, false, false, false).
 		BorderForeground(GrayDark).
 		Width(m.width).
-
 		Render(infoBar)
 
 	return infoBarStyled, lipgloss.Height(infoBarStyled)

@@ -23,8 +23,7 @@ func CreateTrane(tabs []Tab) {
 		tabsPtrs[i] = &tabs[i]
 	}
 
-
-  	s := spinner.New()
+	s := spinner.New()
 	s.Spinner = spinner.MiniDot
 
 	var m = model{
@@ -33,10 +32,9 @@ func CreateTrane(tabs []Tab) {
 		spinner:   s,
 	}
 
-  	zone.NewGlobal()
+	zone.NewGlobal()
 
 	program := tea.NewProgram(m, tea.WithAltScreen(), tea.WithMouseCellMotion())
-
 
 	run(m.tabs, program)
 

@@ -12,9 +12,9 @@
       "args": ["-la"]
     },
     "upgrade": {
-      "label": "Brew Upgrade",
-      "command": "brew",
-      "args": ["upgrade"],
+      "label": "Ping",
+      "command": "ping",
+      "args": ["google.com"],
       "cwd": "."
     }
   }

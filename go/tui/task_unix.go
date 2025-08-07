@@ -23,7 +23,7 @@ func run(tabs []*Tab, program *tea.Program) {
 			cmd := exec.CommandContext(ctx, tab.Command, tab.Args...)
 			cmd.Dir = tab.Cwd
 
-			cmd.SysProcAttr = &syscall.SysProcAttr{ Setpgid: true }
+			cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 
 			stdoutPipe, err := cmd.StdoutPipe()
 			if err != nil {
@@ -47,33 +47,33 @@ func run(tabs []*Tab, program *tea.Program) {
 
 			tab.pid = cmd.Process.Pid
 
-			tab.cancelFunc = func () {
+			tab.cancelFunc = func() {
 				cancel()
 				syscall.Kill(-tab.pid, syscall.SIGKILL)
 			}
 
-			go func () {
+			go func() {
 				scanner := bufio.NewScanner(stdoutPipe)
 				for scanner.Scan() {
 					program.Send(outputMsg{
 						index: i,
-						line: scanner.Text(),
+						line:  scanner.Text(),
 					})
 				}
 			}()
 
-			go func () {
+			go func() {
 				scanner := bufio.NewScanner(stderrPipe)
 				for scanner.Scan() {
 					program.Send(outputMsg{
 						index: i,
-						line: scanner.Text(),
+						line:  scanner.Text(),
 					})
 				}
 			}()
 
 			err = cmd.Wait()
-			program.Send(doneMsg{ index: i, err: err })
+			program.Send(doneMsg{index: i, err: err})
 		}()
 	}
 }
