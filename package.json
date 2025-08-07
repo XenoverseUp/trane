@@ -1,6 +1,6 @@
 {
   "name": "@xenoverseup/trane",
-  "version": "0.0.14",
+  "version": "1.0.0",
   "license": "MIT",
   "homepage": "https://github.com/XenoverseUp/trane#readme",
   "description": "A modern parallel task runner CLI built with Go.",
