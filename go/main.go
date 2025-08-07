@@ -10,7 +10,7 @@ import (
 	"github.com/xenoverseup/trane/tui"
 )
 
-const version = "1.0.0"
+const version = "1.0.1"
 
 type Task struct {
 	Label   string   `json:"label"`

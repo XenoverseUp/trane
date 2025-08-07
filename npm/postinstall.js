@@ -36,6 +36,7 @@ try {
         } else {
           rmSync(fullPath);
         }
+        console.log(`Removing ${fullPath}...`);
       } catch (err) {
         // Skip silently
       }
