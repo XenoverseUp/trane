@@ -26,6 +26,7 @@
   },
   "files": [
     "npm/cli.js",
+    "npm/postinstall.js",
     "npm/bin/",
     "trane-config.d.ts"
   ],
