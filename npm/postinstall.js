@@ -1,7 +1,7 @@
 import { platform, arch } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { readdirSync, rmSync } from "node:fs";
+import { readdirSync, rmSync, statSync } from "node:fs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -24,15 +24,21 @@ if (!currentOS || !currentArch) process.exit(0);
 const binDir = join(__dirname, "../bin");
 
 try {
-  const folders = readdirSync(binDir, { withFileTypes: true })
-    .filter((dirent) => dirent.isDirectory())
-    .map((dirent) => dirent.name);
+  const entries = readdirSync(binDir);
 
-  for (const folder of folders) {
-    if (!folder.startsWith(`trane_${currentOS}_${currentArch}_v`)) {
-      const fullPath = join(binDir, folder);
-
-      rmSync(fullPath, { recursive: true, force: true });
+  for (const entry of entries) {
+    if (!entry.includes(`${currentOS}_${currentArch}`)) {
+      const fullPath = join(binDir, entry);
+      try {
+        const stat = statSync(fullPath);
+        if (stat.isDirectory()) {
+          rmSync(fullPath, { recursive: true, force: true });
+        } else {
+          rmSync(fullPath);
+        }
+      } catch (err) {
+        // Skip silently
+      }
     }
   }
 } catch {
