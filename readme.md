@@ -81,6 +81,7 @@ If your editor supports it, enable auto-completion and type-checking:
 ## TODO Roadmap
 
 - [x] Go migration
+- [ ] Fix posinstall script
 - [ ] Export logs to file
 - [ ] Timestamp each output
 - [ ] Native buffer support
